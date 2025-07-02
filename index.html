@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Tic Tac Toe</title>
+  <link rel="stylesheet" href="style.css" />
+  <audio id="moveSound" src="move.mp3"></audio>
+  <audio id="winSound" src="win.mp3"></audio>
+  <audio id="tieSound" src="tie.mp3"></audio>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Tic‑Tac‑Toe</h1>
+    <div id="board" class="board">
+      <button data-cell="0"></button>
+      <button data-cell="1"></button>
+      <button data-cell="2"></button>
+      <button data-cell="3"></button>
+      <button data-cell="4"></button>
+      <button data-cell="5"></button>
+      <button data-cell="6"></button>
+      <button data-cell="7"></button>
+      <button data-cell="8"></button>
+    </div>
+    <div class="controls">
+      <p id="turnIndicator">Player X's turn</p>
+      <button id="resetBtn">Restart</button>
+    </div>
+    <div class="scoreboard">
+      <span>Score – X: <span id="scoreX">0</span></span>
+      <span>O: <span id="scoreO">0</span></span>
+      <span>Ties: <span id="scoreTies">0</span></span>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

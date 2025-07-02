@@ -1,0 +1,72 @@
+* { box-sizing: border-box; margin:0; padding:0; font-family:sans-serif; }
+body {
+  background:#222; color:#fff;
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; padding:10px;
+}
+
+/* Container */
+.game-container {
+  width:100%;
+  max-width:400px;
+  margin:0 auto;
+  text-align:center;
+}
+
+/* Responsive layout for board */
+.board {
+  display:grid;
+  gap:5px;
+  grid-template-columns:repeat(3,1fr);
+  /* Make board square based on available width */
+  width:100%;
+  aspect-ratio:1 / 1;
+}
+
+/* Cell styling */
+.board button {
+  background:#333;
+  border:2px solid #555;
+  color:#0ff;
+  font-size:2rem;
+  width:100%;
+  height:100%;
+  cursor:pointer;
+  transition:background .2s;
+}
+.board button:hover { background:#444; }
+
+/* Control & Score styling */
+.controls, .scoreboard {
+  margin:10px 0;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  align-items:center;
+}
+#turnIndicator { font-size:1.1rem; flex:1; }
+#resetBtn {
+  padding:8px 16px;
+  font-size:1rem;
+  background:#0ff; border:none;
+  color:#222;
+  border-radius:4px;
+  cursor:pointer;
+  transition:opacity .2s;
+}
+#resetBtn:hover { opacity:0.8; }
+.scoreboard span {
+  background:#333;
+  padding:5px 10px;
+  border-radius:4px;
+  font-size:0.9rem;
+}
+
+/* Adjust text sizing on small screens */
+@media (max-width: 400px) {
+  .board button { font-size:1.5rem; }
+  #turnIndicator { font-size:1rem; }
+  #resetBtn { font-size:0.9rem; padding:6px 12px; }
+  .scoreboard span { font-size:0.8rem; padding:4px 8px; }
+}
