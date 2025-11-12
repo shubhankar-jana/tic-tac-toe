@@ -3,66 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tic-Tac-Toe</title>
+  <title>Elevate Tic-Tac-Toe Pro</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <button class="rules-btn" id="rulesBtn">📜 Rules</button>
-  <button class="mode-toggle" id="modeBtn">🌙 Dark</button>
+  <header>
+    <h1>✨ Elevate Tic-Tac-Toe</h1>
+    <div class="header-buttons">
+      <button id="rulesBtn">📜 Rules</button>
+      <button id="modeBtn">🌙 Dark</button>
+    </div>
+  </header>
 
-  <h1>Elevate Tic-Tac-Toe</h1>
+  <main>
+    <div class="game-container">
+      <div class="controls">
+        <label for="difficulty">Select Mode:</label>
+        <select id="difficulty">
+          <option value="human">👥 Human vs Human</option>
+          <option value="easy">🤖 Easy</option>
+          <option value="medium" selected>🧠 Medium</option>
+          <option value="hard">🔥 Hard</option>
+        </select>
+      </div>
 
-  <div class="difficulty">
-    <label for="difficulty">Difficulty: </label>
-    <select id="difficulty">
-      <option value="easy">Easy</option>
-      <option value="medium" selected>Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-  </div>
+      <div class="status-box">
+        <h2 id="status">Player X Turn</h2>
+        <p id="winner"></p>
+      </div>
 
-  <div class="status" id="status">Player X Turn</div>
+      <div class="game-board">
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      </div>
 
-  <div class="scoreboard">
-    <span id="scoreX">Player X: 0</span>
-    <span id="scoreO">Player O: 0</span>
-  </div>
+      <div class="buttons">
+        <button id="resetBtn">🔄 Reset</button>
+        <button id="undoBtn">↩️ Undo</button>
+      </div>
 
-  <div class="board" id="board">
-    <button class="cell" data-index="0"></button>
-    <button class="cell" data-index="1"></button>
-    <button class="cell" data-index="2"></button>
-    <button class="cell" data-index="3"></button>
-    <button class="cell" data-index="4"></button>
-    <button class="cell" data-index="5"></button>
-    <button class="cell" data-index="6"></button>
-    <button class="cell" data-index="7"></button>
-    <button class="cell" data-index="8"></button>
-  </div>
+      <div class="scoreboard">
+        <p id="scoreX">Player X: 0</p>
+        <p id="scoreO">Player O: 0</p>
+      </div>
+    </div>
+  </main>
 
-  <div class="controls">
-    <button class="btn" id="undoBtn">↩️ Undo</button>
-    <button class="btn" id="resetBtn">🔄 Reset</button>
-  </div>
-
-  <div class="winner" id="winner"></div>
-
-  <footer>⚡ Designed by Shubhankar Jana | Cyber Aesthetic Deluxe ⚡</footer>
+  <footer>
+    <p>© 2025 Elevate Games | Designed by <strong>Shubhankar Jana</strong></p>
+  </footer>
 
   <!-- Rules Modal -->
   <div id="rulesModal" class="modal">
     <div class="modal-content">
-      <span class="close" id="closeModal">&times;</span>
-      <h2>🎯 Game Rules</h2>
+      <span id="closeModal">&times;</span>
+      <h2>📜 Game Rules</h2>
       <ul>
-        <li>Players take turns placing their mark (X or O) on the 3×3 grid.</li>
-        <li>The first player to align 3 marks horizontally, vertically, or diagonally wins.</li>
-        <li>If all 9 squares are filled without a winner, it’s a draw.</li>
-        <li>Use <b>Undo</b> to reverse your last move.</li>
+        <li>Two players take turns marking X and O on the grid.</li>
+        <li>Player X always starts the game.</li>
+        <li>First to get three in a row wins!</li>
+        <li>If all boxes fill and no winner → Draw.</li>
       </ul>
     </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
