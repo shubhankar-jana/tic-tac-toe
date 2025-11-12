@@ -9,6 +9,11 @@ const rulesBtn = document.getElementById('rulesBtn');
 const rulesModal = document.getElementById('rulesModal');
 const closeModal = document.getElementById('closeModal');
 
+// 🔊 Sounds
+const moveSound = document.getElementById("moveSound");
+const winSound = document.getElementById("winSound");
+const drawSound = document.getElementById("drawSound");
+
 let currentPlayer = 'X';
 let board = Array(9).fill('');
 let gameActive = true;
@@ -67,6 +72,10 @@ function handleCellClick(index) {
   cells[index].style.color = currentPlayer === 'X' ? 'var(--accent-x)' : 'var(--accent-o)';
   movesHistory.push(index);
 
+  // 🔊 Play move sound
+  moveSound.currentTime = 0;
+  moveSound.play();
+
   if (checkWin()) return endGame(`${currentPlayer} Wins!`);
   if (board.every(cell => cell !== '')) return endGame("It's a Draw!");
 
@@ -97,6 +106,10 @@ function computerMove(mode) {
     cells[move].textContent = 'O';
     cells[move].style.color = 'var(--accent-o)';
     movesHistory.push(move);
+
+    // 🔊 Play move sound
+    moveSound.currentTime = 0;
+    moveSound.play();
 
     if (checkWin()) return endGame('Computer Wins!');
     if (board.every(cell => cell !== '')) return endGame("It's a Draw!");
@@ -194,7 +207,16 @@ function endGame(message) {
   document.getElementById('scoreX').textContent = `Player X: ${scoreX}`;
   document.getElementById('scoreO').textContent = `Player O: ${scoreO}`;
 
-  // Show win modal
+  // 🔊 Sound for win/draw
+  if (message.includes('Draw')) {
+    drawSound.currentTime = 0;
+    drawSound.play();
+  } else {
+    winSound.currentTime = 0;
+    winSound.play();
+  }
+
+  // 🎨 Show win modal
   winMessage.textContent = `🎉 ${message}`;
   winModal.style.display = 'flex';
 }
@@ -220,4 +242,3 @@ undoBtn.addEventListener('click', () => {
   statusText.textContent = `Player ${currentPlayer} Turn`;
   gameActive = true;
 });
-
