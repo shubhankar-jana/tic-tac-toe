@@ -220,3 +220,4 @@ undoBtn.addEventListener('click', () => {
   statusText.textContent = `Player ${currentPlayer} Turn`;
   gameActive = true;
 });
+
