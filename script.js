@@ -1,155 +1,223 @@
-const cells = document.querySelectorAll(".cell");
-const statusText = document.getElementById("status");
-const winnerText = document.getElementById("winner");
-const resetBtn = document.getElementById("resetBtn");
-const undoBtn = document.getElementById("undoBtn");
-const modeBtn = document.getElementById("modeBtn");
-const rulesBtn = document.getElementById("rulesBtn");
-const modal = document.getElementById("rulesModal");
-const closeModal = document.getElementById("closeModal");
-const difficultySelect = document.getElementById("difficulty");
-const scoreX = document.getElementById("scoreX");
-const scoreO = document.getElementById("scoreO");
+const cells = document.querySelectorAll('.cell');
+const statusText = document.getElementById('status');
+const winnerText = document.getElementById('winner');
+const resetBtn = document.getElementById('resetBtn');
+const undoBtn = document.getElementById('undoBtn');
+const difficultySelect = document.getElementById('difficulty');
+const modeBtn = document.getElementById('modeBtn');
+const rulesBtn = document.getElementById('rulesBtn');
+const rulesModal = document.getElementById('rulesModal');
+const closeModal = document.getElementById('closeModal');
 
-let board = ["", "", "", "", "", "", "", "", ""];
-let currentPlayer = "X";
-let gameOver = false;
-let moveHistory = [];
-let darkMode = true;
-let scores = { X: 0, O: 0 };
+let currentPlayer = 'X';
+let board = Array(9).fill('');
+let gameActive = true;
+let movesHistory = [];
+let scoreX = 0, scoreO = 0;
 
+// 🎮 Win Modal
+const winModal = document.createElement('div');
+winModal.className = 'modal';
+winModal.innerHTML = `
+  <div class="modal-content">
+    <span id="closeWinModal">&times;</span>
+    <h2 id="winMessage">🎉</h2>
+    <button id="playAgainBtn">Play Again</button>
+  </div>
+`;
+document.body.appendChild(winModal);
+const closeWinModal = winModal.querySelector('#closeWinModal');
+const playAgainBtn = winModal.querySelector('#playAgainBtn');
+const winMessage = winModal.querySelector('#winMessage');
+
+// 🎨 Theme toggle
+modeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('light');
+  modeBtn.textContent = document.body.classList.contains('light') ? '☀️ Light' : '🌙 Dark';
+});
+
+// 📜 Rules modal
+rulesBtn.addEventListener('click', () => (rulesModal.style.display = 'flex'));
+closeModal.addEventListener('click', () => (rulesModal.style.display = 'none'));
+
+// 🏆 Win modal control
+closeWinModal.addEventListener('click', () => (winModal.style.display = 'none'));
+playAgainBtn.addEventListener('click', () => {
+  winModal.style.display = 'none';
+  resetGame();
+});
+
+// 🧠 All possible wins
 const winPatterns = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
 ];
 
-// === Game Initialization ===
-function initGame() {
-  cells.forEach((cell, i) => {
-    cell.textContent = "";
-    cell.style.background = "";
-    cell.addEventListener("click", () => cellClick(i));
-  });
-  updateStatus();
-}
+// 🕹️ Player click
+cells.forEach((cell, index) => {
+  cell.addEventListener('click', () => handleCellClick(index));
+});
 
-// === Handle Cell Click ===
-function cellClick(i) {
-  if (board[i] || gameOver) return;
+function handleCellClick(index) {
+  if (!gameActive || board[index] !== '') return;
 
-  board[i] = currentPlayer;
-  moveHistory.push(i);
-  cells[i].textContent = currentPlayer;
-  cells[i].style.color = currentPlayer === "X" ? "var(--accent-x)" : "var(--accent-o)";
-  checkWinner();
-  if (!gameOver) switchPlayer();
-}
+  board[index] = currentPlayer;
+  cells[index].textContent = currentPlayer;
+  cells[index].style.color = currentPlayer === 'X' ? 'var(--accent-x)' : 'var(--accent-o)';
+  movesHistory.push(index);
 
-// === Switch Player ===
-function switchPlayer() {
-  currentPlayer = currentPlayer === "X" ? "O" : "X";
-  updateStatus();
-}
+  if (checkWin()) return endGame(`${currentPlayer} Wins!`);
+  if (board.every(cell => cell !== '')) return endGame("It's a Draw!");
 
-// === Update Status Text ===
-function updateStatus() {
+  currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   statusText.textContent = `Player ${currentPlayer} Turn`;
-  statusText.style.color =
-    currentPlayer === "X" ? "var(--accent-x)" : "var(--accent-o)";
+
+  // 🤖 Computer Move
+  const mode = difficultySelect.value;
+  if (mode !== 'human' && currentPlayer === 'O') {
+    statusText.textContent = '🤖 Computer Thinking...';
+    gameActive = false;
+    setTimeout(() => {
+      computerMove(mode);
+      gameActive = true;
+    }, 800);
+  }
 }
 
-// === Check for Winner ===
-function checkWinner() {
-  for (const [a, b, c] of winPatterns) {
-    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-      highlightWinner([a, b, c]);
-      gameOver = true;
-      winnerText.textContent = `🎉 Player ${board[a]} Wins!`;
-      scores[board[a]]++;
-      updateScoreboard();
-      return;
+// 💻 Computer logic
+function computerMove(mode) {
+  let move;
+  if (mode === 'easy') move = getRandomMove();
+  else if (mode === 'medium') move = getSmartMove();
+  else move = getBestMove(); // hard
+
+  if (move != null) {
+    board[move] = 'O';
+    cells[move].textContent = 'O';
+    cells[move].style.color = 'var(--accent-o)';
+    movesHistory.push(move);
+
+    if (checkWin()) return endGame('Computer Wins!');
+    if (board.every(cell => cell !== '')) return endGame("It's a Draw!");
+
+    currentPlayer = 'X';
+    statusText.textContent = `Player ${currentPlayer} Turn`;
+  }
+}
+
+// 🎯 Easy move
+function getRandomMove() {
+  const empty = board.map((v,i)=>v===''?i:null).filter(v=>v!==null);
+  return empty[Math.floor(Math.random()*empty.length)];
+}
+
+// ⚡ Medium AI
+function getSmartMove() {
+  for (const pattern of winPatterns) {
+    const [a,b,c] = pattern;
+    const values = [board[a], board[b], board[c]];
+    if (values.filter(v=>v==='O').length===2 && values.includes('')) return pattern[values.indexOf('')];
+  }
+  for (const pattern of winPatterns) {
+    const [a,b,c] = pattern;
+    const values = [board[a], board[b], board[c]];
+    if (values.filter(v=>v==='X').length===2 && values.includes('')) return pattern[values.indexOf('')];
+  }
+  return getRandomMove();
+}
+
+// 🔥 Hard AI (minimax)
+function getBestMove() {
+  let bestScore = -Infinity, move;
+  for (let i=0;i<9;i++) {
+    if (board[i]==='') {
+      board[i]='O';
+      const score = minimax(board,0,false);
+      board[i]='';
+      if (score>bestScore){bestScore=score;move=i;}
     }
   }
+  return move;
+}
 
-  if (!board.includes("")) {
-    winnerText.textContent = "🤝 It's a Draw!";
-    gameOver = true;
+function minimax(board,depth,isMaximizing){
+  const winner = getWinner();
+  if(winner==='O') return 10-depth;
+  if(winner==='X') return depth-10;
+  if(board.every(c=>c!=='')) return 0;
+
+  if(isMaximizing){
+    let best=-Infinity;
+    for(let i=0;i<9;i++){
+      if(board[i]===''){
+        board[i]='O';
+        best=Math.max(best,minimax(board,depth+1,false));
+        board[i]='';
+      }
+    }
+    return best;
+  } else {
+    let best=Infinity;
+    for(let i=0;i<9;i++){
+      if(board[i]===''){
+        board[i]='X';
+        best=Math.min(best,minimax(board,depth+1,true));
+        board[i]='';
+      }
+    }
+    return best;
   }
 }
 
-// === Highlight Winning Cells ===
-function highlightWinner(indices) {
-  indices.forEach(i => {
-    cells[i].style.background = "linear-gradient(145deg, #00f6ff, #ff00c3)";
-    cells[i].style.boxShadow = "0 0 25px #00f6ff";
-  });
+// 🏁 Check win
+function checkWin() {
+  return winPatterns.some(([a,b,c]) => board[a] && board[a]===board[b] && board[a]===board[c]);
 }
 
-// === Undo Last Move ===
-undoBtn.addEventListener("click", () => {
-  if (moveHistory.length === 0 || gameOver) return;
-  const lastMove = moveHistory.pop();
-  board[lastMove] = "";
-  cells[lastMove].textContent = "";
-  cells[lastMove].style.background = "";
-  currentPlayer = currentPlayer === "X" ? "O" : "X";
-  gameOver = false;
-  winnerText.textContent = "";
-  updateStatus();
-});
-
-// === Reset Game ===
-resetBtn.addEventListener("click", () => {
-  board = ["", "", "", "", "", "", "", "", ""];
-  moveHistory = [];
-  gameOver = false;
-  currentPlayer = "X";
-  winnerText.textContent = "";
-  cells.forEach(cell => {
-    cell.textContent = "";
-    cell.style.background = "";
-    cell.style.boxShadow = "";
-  });
-  updateStatus();
-});
-
-// === Mode Toggle (Light/Dark) ===
-modeBtn.addEventListener("click", () => {
-  document.body.classList.toggle("light");
-  darkMode = !darkMode;
-  modeBtn.textContent = darkMode ? "🌙 Dark" : "☀️ Light";
-});
-
-// === Rules Modal ===
-rulesBtn.addEventListener("click", () => {
-  modal.style.display = "flex";
-});
-closeModal.addEventListener("click", () => {
-  modal.style.display = "none";
-});
-window.addEventListener("click", (e) => {
-  if (e.target === modal) modal.style.display = "none";
-});
-
-// === Scoreboard Update ===
-function updateScoreboard() {
-  scoreX.textContent = `Player X: ${scores.X}`;
-  scoreO.textContent = `Player O: ${scores.O}`;
+function getWinner(){
+  for(const [a,b,c] of winPatterns){
+    if(board[a] && board[a]===board[b] && board[a]===board[c]) return board[a];
+  }
+  return null;
 }
 
-// === Difficulty (optional AI feature) ===
-difficultySelect.addEventListener("change", (e) => {
-  const level = e.target.value;
-  console.log(`Difficulty set to: ${level}`);
-  // Placeholder: implement AI later for easy/medium/hard
-});
+// 🎉 End Game
+function endGame(message) {
+  gameActive = false;
+  winnerText.textContent = message;
+  statusText.textContent = 'Game Over';
 
-// === Start the Game ===
-initGame();
+  if (message.includes('X')) scoreX++;
+  else if (message.includes('O')) scoreO++;
+
+  document.getElementById('scoreX').textContent = `Player X: ${scoreX}`;
+  document.getElementById('scoreO').textContent = `Player O: ${scoreO}`;
+
+  // Show win modal
+  winMessage.textContent = `🎉 ${message}`;
+  winModal.style.display = 'flex';
+}
+
+// 🔁 Reset
+resetBtn.addEventListener('click', resetGame);
+function resetGame() {
+  board.fill('');
+  cells.forEach(c => c.textContent = '');
+  currentPlayer = 'X';
+  statusText.textContent = 'Player X Turn';
+  winnerText.textContent = '';
+  gameActive = true;
+}
+
+// ↩️ Undo
+undoBtn.addEventListener('click', () => {
+  if (!movesHistory.length) return;
+  const lastMove = movesHistory.pop();
+  board[lastMove] = '';
+  cells[lastMove].textContent = '';
+  currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+  statusText.textContent = `Player ${currentPlayer} Turn`;
+  gameActive = true;
+});
 
